@@ -1,0 +1,11 @@
+{
+  "name": "dogma",
+  "description": "Dogma is A code style linter for Elixir, powered by shame.",
+  "maintainer": {
+    "name": "Michał Kalbarczyk",
+    "email": "fazibear@gmail.com"
+  },
+  "languages" : ["Elixir"],
+  "version": "0.1",
+  "spec_version": "0.0.1"
+}
