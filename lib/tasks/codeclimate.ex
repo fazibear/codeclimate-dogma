@@ -7,7 +7,6 @@ defmodule Mix.Tasks.Codeclimate do
   alias Dogma.Config
   alias CodeclimateDogma.Reporter
 
-  #@code_dir "/Users/fazibear/dev/sprint-poker/lib"
   @code_dir "/code/lib"
 
   def run(_argv) do

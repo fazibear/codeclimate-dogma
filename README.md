@@ -4,4 +4,4 @@ Code Climate engine for [Dogma](https://github.com/lpil/dogma) a code style lint
 
 ## Configure
 
-You can configure this engine in `config/dogma.exs` file within you project. More informations is available [here](https://github.com/rrrene/credo#configuration).
+You can configure this engine in `config/dogma.exs` file within you project. More informations is available [here](https://github.com/lpil/dogma/blob/master/docs/configuration.md).
