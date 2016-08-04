@@ -6,8 +6,11 @@ defmodule Mix.Tasks.Codeclimate do
 
   alias Dogma.Config
   alias CodeclimateDogma.Reporter
+  alias Dogma.Rule
 
+  #@code_dir "/Users/fazibear/dev/sprint-poker"
   @code_dir "/code"
+  @config_file "/config.json"
 
   @default_exclude [
     ~r(\A#{@code_dir}/_build/),
@@ -18,11 +21,47 @@ defmodule Mix.Tasks.Codeclimate do
     {:ok, dispatcher} = GenEvent.start_link([])
     GenEvent.add_handler(dispatcher, Reporter, [])
 
+    config = config_file
+
+    Application.put_env(:dogma, :exclude, @default_exclude ++ exclude(config))
+    Application.put_env(:dogma, :override, override(config))
+
     @code_dir
-    |> Dogma.run(config, dispatcher)
+    |> Dogma.run(Config.build, dispatcher)
   end
 
-  def config do
-    %Config{Config.build | exclude: @default_exclude}
+  defp exclude(config) do
+    config
+    |> Map.get(:exclude, [])
+    |> Enum.map(fn (exclude) ->
+      ~r(/A#{@code_dir}#{exclude})
+    end)
+  end
+
+  defp override(config) do
+    config
+    |> Map.get(:override, [])
+    |> Enum.map(&map_rules/1)
+  end
+
+  defp map_rules({key, opts}) do
+    rule_name = key
+                |> Atom.to_string
+                |> Macro.camelize
+
+    Rule
+    |> Module.concat(rule_name)
+    |> struct(Keyword.new(opts))
+  end
+
+  defp config_file do
+    case File.read(@config_file) do
+      {:ok, config} ->
+        config
+        |> Poison.decode!(keys: :atoms)
+        |> Map.get(:config, %{})
+      {:error, _} ->
+        %{}
+    end
   end
 end

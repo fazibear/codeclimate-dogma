@@ -29,7 +29,7 @@ defmodule CodeclimateDogma.Reporter do
   defp format_error(error, script) do
     %{
       type: "Issue",
-      check_name: error.rule,
+      check_name: check_name(error.rule),
       description: error.message,
       categories: ["Style"],
       location: %{
@@ -45,5 +45,11 @@ defmodule CodeclimateDogma.Reporter do
   defp path(path) do
     path
     |> String.replace(~r/^\/code\//, "")
+  end
+
+  defp check_name(rule) do
+    rule
+    |> to_string
+    |> String.replace("Elixir.Dogma.Rule.", "")
   end
 end

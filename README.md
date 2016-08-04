@@ -5,3 +5,15 @@ Code Climate engine for [Dogma](https://github.com/lpil/dogma) a code style lint
 ## Configure
 
 You can configure this engine in `config/dogma.exs` file within you project. More informations is available [here](https://github.com/lpil/dogma/blob/master/docs/configuration.md).
+
+Also you can add follwing options in .codeclimate.yml:
+
+```yml
+engines:
+  dogma:
+    enabled: true
+    config:
+      override:
+        line_length:
+          max_length: 666
+```
