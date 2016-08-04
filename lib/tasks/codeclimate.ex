@@ -8,7 +8,6 @@ defmodule Mix.Tasks.Codeclimate do
   alias CodeclimateDogma.Reporter
   alias Dogma.Rule
 
-  #@code_dir "/Users/fazibear/dev/sprint-poker"
   @code_dir "/code"
   @config_file "/config.json"
 
@@ -34,7 +33,7 @@ defmodule Mix.Tasks.Codeclimate do
     config
     |> Map.get(:exclude, [])
     |> Enum.map(fn (exclude) ->
-      ~r(/A#{@code_dir}#{exclude})
+      ~r(\A#{@code_dir}#{exclude})
     end)
   end
 

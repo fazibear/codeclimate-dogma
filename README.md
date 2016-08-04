@@ -16,4 +16,6 @@ engines:
       override:
         line_length:
           max_length: 666
+      exclude:
+       - /web/
 ```
