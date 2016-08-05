@@ -18,21 +18,23 @@ defmodule Mix.Tasks.Codeclimate do
 
   def run(_argv) do
     try do
+      setup_dogma
       run_dogma
     rescue
       error -> log_error(error)
     end
+  end
 
+
+  defp setup_dogma do
+    config = config_file
+    Application.put_env(:dogma, :exclude, @default_exclude ++ exclude(config))
+    Application.put_env(:dogma, :override, override(config))
   end
 
   defp run_dogma do
     {:ok, dispatcher} = GenEvent.start_link([])
     GenEvent.add_handler(dispatcher, Reporter, [])
-
-    config = config_file
-
-    Application.put_env(:dogma, :exclude, @default_exclude ++ exclude(config))
-    Application.put_env(:dogma, :override, override(config))
 
     @code_dir
     |> Dogma.run(Config.build, dispatcher)
