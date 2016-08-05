@@ -17,6 +17,15 @@ defmodule Mix.Tasks.Codeclimate do
   ]
 
   def run(_argv) do
+    try do
+      run_dogma
+    rescue
+      error -> log_error(error)
+    end
+
+  end
+
+  defp run_dogma do
     {:ok, dispatcher} = GenEvent.start_link([])
     GenEvent.add_handler(dispatcher, Reporter, [])
 
@@ -63,8 +72,13 @@ defmodule Mix.Tasks.Codeclimate do
         config
         |> Poison.decode!(keys: :atoms)
         |> Map.get(:config, %{})
-      {:error, _} ->
+      {:error, error} ->
+        log_error(error)
         %{}
     end
+  end
+
+  defp log_error(error) do
+    IO.inspect(:stderr, error)
   end
 end
