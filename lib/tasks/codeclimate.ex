@@ -29,21 +29,24 @@ defmodule Mix.Tasks.Codeclimate do
     |> Dogma.run(Config.build, dispatcher)
   end
 
-  defp exclude(config) do
+  defp exclude(config) when is_list(config) do
     config
     |> Map.get(:exclude, [])
     |> Enum.map(fn (exclude) ->
       ~r(\A#{@code_dir}#{exclude})
     end)
   end
+  defp exclude(_), do: []
 
-  defp override(config) do
+  defp override(config) when is_map(config) do
     config
     |> Map.get(:override, [])
     |> Enum.map(&map_rules/1)
+    |> Enum.reject(&!&1)
   end
+  defp override(_), do: []
 
-  defp map_rules({key, opts}) do
+  defp map_rules({key, opts = %{}}) do
     rule_name = key
                 |> Atom.to_string
                 |> Macro.camelize
@@ -52,6 +55,7 @@ defmodule Mix.Tasks.Codeclimate do
     |> Module.concat(rule_name)
     |> struct(Keyword.new(opts))
   end
+  defp map_rules(_), do: nil
 
   defp config_file do
     case File.read(@config_file) do
