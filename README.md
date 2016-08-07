@@ -1,4 +1,4 @@
-# Code Climate Dogma Engine
+# Code Climate Dogma Engine [![Build Status](https://travis-ci.org/fazibear/codeclimate-dogma.svg?branch=master)](https://travis-ci.org/fazibear/codeclimate-dogma)
 
 Code Climate engine for [Dogma](https://github.com/lpil/dogma) a code style linter for [Elixir Language](http://elixir-lang.org/).
 
