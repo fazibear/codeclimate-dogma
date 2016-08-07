@@ -3,6 +3,8 @@ defmodule CodeclimateDogma.Reporter do
   Dogma formatter for Code Climate.
   """
 
+  @delimiter "\0"
+
   use GenEvent
 
   def handle_event({:finished, scripts}, _) do
@@ -14,7 +16,7 @@ defmodule CodeclimateDogma.Reporter do
   def finish(scripts) do
     scripts
     |> Enum.map(&format/1)
-    |> Enum.join("\0")
+    |> Enum.join(@delimiter)
   end
 
   defp format(script) do
@@ -23,7 +25,7 @@ defmodule CodeclimateDogma.Reporter do
          error
          |> format_error(script)
        end)
-    |> Enum.join("\0")
+    |> Enum.join(@delimiter)
   end
 
   defp format_error(error, script) do
