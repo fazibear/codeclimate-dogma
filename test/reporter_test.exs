@@ -47,6 +47,6 @@ defmodule Test.Reporter do
 
     result = capture_io(fn -> Reporter.handle_event({:finished, scripts}, []) end)
 
-    assert result == "\0{\"type\":\"Issue\",\"location\":{\"path\":\"bar.ex\",\"lines\":{\"end\":1,\"begin\":1}},\"description\":\"Module without a @moduledoc detected\",\"check_name\":\"ModuleDoc\",\"categories\":[\"Style\"]}\0{\"type\":\"Issue\",\"location\":{\"path\":\"bar.ex\",\"lines\":{\"end\":14,\"begin\":14}},\"description\":\"Comparison to a boolean is pointless\",\"check_name\":\"ComparisonToBoolean\",\"categories\":[\"Style\"]}"
+    assert result == ~s(\0{"type":"Issue","location":{"path":"bar.ex","lines":{"end":1,"begin":1}},"description":"Module without a @moduledoc detected","check_name":"ModuleDoc","categories":["Style"]}\0{"type":"Issue","location":{"path":"bar.ex","lines":{"end":14,"begin":14}},"description":"Comparison to a boolean is pointless","check_name":"ComparisonToBoolean","categories":["Style"]})
   end
 end
