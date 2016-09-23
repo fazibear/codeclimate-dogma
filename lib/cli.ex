@@ -5,6 +5,9 @@ defmodule Codeclimate.CLI do
   alias Dogma.Config
   alias CodeclimateDogma.Reporter
   alias Dogma.Rule
+  alias Dogma.ScriptSources
+  alias Dogma.Script
+  alias Dogma.Runner
 
   @code_dir "."
   @config_file "/config.json"
@@ -34,7 +37,46 @@ defmodule Codeclimate.CLI do
     GenEvent.add_handler(dispatcher, Reporter, [])
 
     @code_dir
-    |> Dogma.run(Config.build, dispatcher)
+    |> run(Config.build, dispatcher)
+  end
+
+  def run(dir_or_file, config, dispatcher) do
+    dir_or_file
+    |> ScriptSources.find(config.exclude)
+    |> ScriptSources.to_scripts
+    |> notify_start(dispatcher)
+    |> test(config.rules, dispatcher)
+    |> notify_finish(dispatcher)
+  end
+
+  def test(scripts, rules, dispatcher) do
+    scripts
+    |> Enum.map(&Task.async(fn -> test_script(&1, dispatcher, rules) end))
+    |> Enum.map(&Task.await/1)
+  end
+
+  defp test_script(script, dispatcher, rules) do
+    errors = try do
+      script |> Runner.run_tests( rules )
+    rescue
+      error ->
+        log_error(error)
+        []
+    end
+
+    script = %Script{ script | errors: errors }
+    GenEvent.sync_notify( dispatcher, {:script_tested, script} )
+    script
+  end
+
+  defp notify_start(scripts, dispatcher) do
+    GenEvent.sync_notify(dispatcher, {:start, scripts})
+    scripts
+  end
+
+  defp notify_finish(scripts, dispatcher) do
+    GenEvent.sync_notify(dispatcher, {:finished, scripts})
+    scripts
   end
 
   defp exclude(config) when is_list(config) do
@@ -78,6 +120,6 @@ defmodule Codeclimate.CLI do
   end
 
   defp log_error(error) do
-    IO.inspect(:stderr, error)
+    IO.inspect(:stderr, error, [])
   end
 end
