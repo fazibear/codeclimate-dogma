@@ -12,13 +12,13 @@ defmodule Codeclimate.CLI do
   @config_file "/config.json"
 
   def main(_argv) do
-    try do
+    #try do
       config = config_file
       Application.put_env(:dogma, :override, override(config))
       run_dogma(config)
-    rescue
-      error -> log_error(error)
-    end
+      #rescue
+        #error -> log_error(error)
+        #end
   end
 
   defp run_dogma(config) do
@@ -77,24 +77,34 @@ defmodule Codeclimate.CLI do
     scripts
   end
 
-  defp override(config) when is_map(config) do
-    config
-    |> Map.get(:override, [])
+  defp override(%{"config" => %{"override" => override}}) when is_map(override) do
+    override
     |> Enum.map(&map_rules/1)
     |> Enum.reject(&!&1)
   end
   defp override(_), do: []
 
   defp map_rules({key, opts = %{}}) do
-    rule_name = key
-                |> Atom.to_string
-                |> Macro.camelize
+    rule_name = key |> Macro.camelize
 
     Rule
     |> Module.concat(rule_name)
-    |> struct(Keyword.new(opts))
+    |> with_opts(opts)
   end
   defp map_rules(_), do: nil
+
+
+  defp with_opts(name, opts) do
+    opts = Keyword.new(opts, fn(opt) ->
+      try do
+        {key, value} = opt
+        {String.to_atom(key), value}
+      rescue
+        _ -> {:error, "error"}
+      end
+    end)
+    struct(name, opts)
+  end
 
   defp config_file do
     case File.read(@config_file) do

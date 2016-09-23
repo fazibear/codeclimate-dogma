@@ -14,8 +14,6 @@ engines:
     enabled: true
     config:
       override:
-        line_length:
-          max_length: 666
-      exclude:
-       - /web/
+          line_length:
+            max_length: 666
 ```
