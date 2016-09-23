@@ -34,6 +34,7 @@ defmodule CodeclimateDogma.Reporter do
       check_name: check_name(error.rule),
       description: error.message,
       categories: ["Style"],
+      remediation_points: 100_000,
       location: %{
         path: script.path,
         lines: %{
