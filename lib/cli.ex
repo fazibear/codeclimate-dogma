@@ -9,36 +9,34 @@ defmodule Codeclimate.CLI do
   alias Dogma.Script
   alias Dogma.Runner
 
-  @code_dir "."
   @config_file "/config.json"
-
-  @default_exclude [
-    ~r(\A#{@code_dir}/_build/),
-    ~r(\A#{@code_dir}/deps/)
-  ]
 
   def main(_argv) do
     try do
-      setup_dogma
-      run_dogma
+      config = config_file
+      Application.put_env(:dogma, :override, override(config))
+      run_dogma(config)
     rescue
       error -> log_error(error)
     end
   end
 
-  defp setup_dogma do
-    config = config_file
-    Application.put_env(:dogma, :exclude, @default_exclude ++ exclude(config))
-    Application.put_env(:dogma, :override, override(config))
-  end
-
-  defp run_dogma do
+  defp run_dogma(config) do
     {:ok, dispatcher} = GenEvent.start_link([])
     GenEvent.add_handler(dispatcher, Reporter, [])
 
-    @code_dir
-    |> run(Config.build, dispatcher)
+    config
+    |> get_dirs
+    |> Enum.each(fn(dir) ->
+      dir |> run(Config.build, dispatcher)
+      IO.write("\0")
+    end)
   end
+
+  def get_dirs(%{"include_paths" => paths}) do
+    paths
+  end
+  def get_dirs(_), do: ["."]
 
   def run(dir_or_file, config, dispatcher) do
     dir_or_file
@@ -79,15 +77,6 @@ defmodule Codeclimate.CLI do
     scripts
   end
 
-  defp exclude(config) when is_list(config) do
-    config
-    |> Map.get(:exclude, [])
-    |> Enum.map(fn (exclude) ->
-      ~r(\A#{@code_dir}#{exclude})
-    end)
-  end
-  defp exclude(_), do: []
-
   defp override(config) when is_map(config) do
     config
     |> Map.get(:override, [])
@@ -109,13 +98,8 @@ defmodule Codeclimate.CLI do
 
   defp config_file do
     case File.read(@config_file) do
-      {:ok, config} ->
-        config
-        |> Poison.decode!(keys: :atoms)
-        |> Map.get(:config, %{})
-      {:error, error} ->
-        log_error(error)
-        %{}
+      {:ok, config} -> config |> Poison.decode!
+      _ -> %{}
     end
   end
 
