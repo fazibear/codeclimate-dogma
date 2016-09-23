@@ -35,18 +35,13 @@ defmodule CodeclimateDogma.Reporter do
       description: error.message,
       categories: ["Style"],
       location: %{
-        path: path(script.path),
+        path: script.path,
         lines: %{
           begin: error.line,
           end: error.line
         }
       }
     } |> Poison.encode!
-  end
-
-  defp path(path) do
-    path
-    |> String.replace(~r/^\/code\//, "")
   end
 
   defp check_name(rule) do
